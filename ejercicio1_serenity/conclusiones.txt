@@ -1,0 +1,14 @@
+EJERCICIO 1 - HALLAZGOS Y CONCLUSIONES
+
+Durante el desarrollo de la prueba funcional E2E en la página de OpenCart (http://opencart.abstracta.us/), se realizaron los siguientes hallazgos y se tomaron las siguientes decisiones de diseño para garantizar la robustez del proyecto:
+
+1. Restricción del "Guest Checkout" (Falta de Stock):
+   - Hallazgo: Al intentar realizar el Checkout de los productos "MacBook" e "iPhone", el sistema de OpenCart indicaba mediante el símbolo "***" que no había stock disponible para completar una compra de invitado (Guest Checkout), obligando al sistema a requerir forzosamente el registro de una cuenta en su lugar.
+   - Solución implementada (Enfoque QA Senior): En lugar de forzar un "Guest Checkout" que fallaría en el paso de validación nativa del sistema, el flujo de automatización se adaptó para realizar el "Register Account" (Registro). Para evitar el error de "Correo electrónico ya registrado" en ejecuciones repetitivas de las pruebas, se implementó un generador dinámico de correos electrónicos basado en el Timestamp actual (ej. customer1700000000@test.com). Esto asegura la estabilidad a largo plazo.
+
+2. Manejo de Elementos Dinámicos en Componentes Reactivos (StaleElementReferenceException):
+   - Hallazgo: Al interactuar con el texto interno del carrito luego de agregar los productos, las llamadas asíncronas de AJAX actualizaban el DOM y reconstruían el componente, causando que Selenium lanzara excepciones de elementos obsoletos (StaleElementReferenceException) por intentar leer un elemento que ya no existía y fue reemplazado.
+   - Solución implementada: Se modificó la estrategia de localización de elementos en el PageObject "HomePage.java", interactuando con el contenedor padre estático "#cart > button" en lugar del sub-elemento dinámico interior. Esta es una práctica recomendada en el patrón Screenplay para evitar flaquezas provocadas por cargas asíncronas en interfaces web sin necesidad de abusar de tiempos de espera estáticos ("Thread.sleep") que enlentecen las pruebas.
+
+3. Separación de Casos de Prueba (Cobertura Funcional Adecuada):
+   - Además del "Happy Path" E2E de compra, se elaboró un escenario separado para la verificación estricta de validaciones de campos obligatorios en el formulario de registro y facturación. De esta manera, el Feature principal ("purchase_flow.feature") expone las funcionalidades completas en concordancia con las buenas prácticas de BDD y Patrón Screenplay, logrando una automatización fácil de mantener.

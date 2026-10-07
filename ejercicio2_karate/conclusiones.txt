@@ -1,0 +1,14 @@
+EJERCICIO 2 - HALLAZGOS Y CONCLUSIONES
+
+Durante el desarrollo de las pruebas automatizadas del API REST de PetStore (https://petstore.swagger.io/) empleando Karate DSL, se identificaron los siguientes puntos:
+
+1. Elección de la Arquitectura de la Prueba:
+   - Dado que el ciclo de vida de un usuario (Crear, Consultar, Actualizar, Consultar y Eliminar) conforma un flujo E2E altamente acoplado por naturaleza (se necesita el usuario creado para poder actualizarlo), se diseñó la prueba dentro de un mismo `Scenario` secuencial. Esto es una buena práctica en Karate para pruebas de integración de transacciones con estado, reduciendo sobreingeniería en el paso de variables entre escenarios.
+
+2. Manejo de Datos Aleatorios (Prevención de Conflictos):
+   - Se utilizó interoperabilidad con Java llamando a `java.lang.System.currentTimeMillis()` dentro del `Background` del feature. De este modo, garantizamos que variables clave como el `id`, `username` y `email` sean siempre únicos en cada ejecución. Esto evita falsos negativos por choques de datos residuales en el ambiente de pruebas público de PetStore.
+
+3. Estabilidad del API:
+   - Se observó que el API responde exitosamente a todas las peticiones con latencias muy estables y sin errores HTTP 5xx. 
+   - Se implementaron validaciones de estado HTTP (status 200) combinadas con "matches" específicos del cuerpo de la respuesta (verificando que efectivamente los cambios del método PUT persistieran al llamar nuevamente con un GET).
+   - En el paso final, se validó exitosamente la ausencia del registro borrado esperando proactivamente el código 404 (Not Found) al intentar consultar el usuario eliminado.

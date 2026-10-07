@@ -1,0 +1,10 @@
+EJERCICIO 3 - Conclusiones del Script de Performance
+
+1. Diseño Orientado a Metas (Goal-Oriented):
+   - Al requerirse garantizar "al menos 20 TPS", se eligió el ejecutor "constant-arrival-rate" en k6 configurado a 25 TPS constantes. A diferencia de simplemente lanzar Usuarios Virtuales y "esperar a ver cuántos TPS se logran" (lo cual es muy variable y depende del ping de la red), este enfoque inyecta exactamente la tasa deseada, forzando a la aplicación a recibir 25 peticiones por segundo pase lo que pase, siendo una prueba de carga mucho más científica y exacta.
+
+2. Aserciones y Thresholds (Umbrales de Tolerancia):
+   - Se programaron "Thresholds" explícitos integrados en k6 para la tasa de error (rate<0.03) y para el percentil 95 (p(95)<1500ms). Esto significa que la prueba tiene la inteligencia para auto-declararse como "Fallida" (exit code != 0) si la aplicación no cumple los requisitos, ideal para bloquear integraciones en pipelines de despliegue continuo (CI/CD).
+
+3. Parametrización Escalable:
+   - Los datos se leen desde un CSV ("users.csv") usando la librería "papaparse" importada directamente al vuelo y envolviendo el archivo en un "SharedArray". Esta es una práctica Senior en k6, ya que el archivo CSV se carga una única vez en la memoria RAM compartida de la máquina de prueba, en lugar de duplicarse en memoria por cada uno de los Usuarios Virtuales, optimizando enormemente el consumo de recursos de nuestra propia máquina de testing.
